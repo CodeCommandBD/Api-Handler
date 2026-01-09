@@ -7,28 +7,34 @@ import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
-
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
-    resolver: zodResolver(registerSchema)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
   });
   const onSubmit = async (data) => {
     try {
-      setLoading(true)
-      const response = await axios.post('/users/register', data)
-      toast(response.data.message || "Registration successful")
-      navigate("/login")
+      setLoading(true);
+      const response = await axios.post("/users/register", data);
+      toast.success(response.data.message || "Registration successful");
+      navigate("/login");
     } catch (error) {
-      const errorMessage = error.response.data.message || error.response.data.error || "Registration failed. Please try again"
-      toast.error(errorMessage)
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Registration failed. Please try again";
+      toast.error(errorMessage);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -321,7 +327,7 @@ const Register = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

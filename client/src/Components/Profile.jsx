@@ -1,33 +1,43 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import ProfileSkeleton from './ProfileSkeleton'
-import {toast} from 'react-toastify'
-const Profile = () => {
+import React, { useEffect, useState } from "react";
+import axios from "../lib/axiosConfig";
+import { useNavigate } from "react-router-dom";
+import ProfileSkeleton from "./ProfileSkeleton";
+import { toast } from "react-toastify";
+import UpdateProfile from "./UpdateProfile";
+import ChangePassword from "./ChangePassword";
+import DeleteAccount from "./DeleteAccount";
 
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(flase)
-  const navigate = useNavigate()
+const Profile = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("view");
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("/users/profile")
-        console.log(response.data.user);
-        setUser(response.data.user)
+        const response = await axios.get("/users/profile");
+        setUser(response?.data?.user);
       } catch (error) {
-        const errorMessage = error.response?.data.message || "Failed to fetch profile data"
-        toast.error(error)
-
+        const errorMessage =
+          error.response?.data?.message || "Failed to fetch profile data";
+        toast.error(errorMessage);
       } finally {
-        setLoading(flase)
+        setLoading(false);
       }
-    }
-    fetchProfile()
-  }, [navigate])
+    };
+    fetchProfile();
+  }, [navigate]);
+
+  const handleUpdateUser = (updatedUser) => {
+    setUser(updatedUser);
+    setActiveTab("view");
+  };
 
   if (loading) {
-    return <ProfileSkeleton></ProfileSkeleton>
+    return <ProfileSkeleton></ProfileSkeleton>;
   }
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -37,31 +47,89 @@ const Profile = () => {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Profile</h1>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Email
-              </label>
-              <p className="text-lg text-gray-900">{user.email}</p>
-            </div>
-            {user.username && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Username
-                </label>
-                <p className="text-lg text-gray-900">{user.username}</p>
-              </div>
-            )}
+      <div className="max-w-4xl mx-auto">
+        {/* Tabs */}
+        <div className="bg-white rounded-t-2xl shadow-xl border border-gray-100">
+          <div className="flex border-b">
+            <button
+              onClick={() => setActiveTab("view")}
+              className={`flex-1 py-4 px-6 font-semibold ${
+                activeTab === "view"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              View Profile
+            </button>
+            <button
+              onClick={() => setActiveTab("update")}
+              className={`flex-1 py-4 px-6 font-semibold ${
+                activeTab === "update"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Update Profile
+            </button>
+            <button
+              onClick={() => setActiveTab("password")}
+              className={`flex-1 py-4 px-6 font-semibold ${
+                activeTab === "password"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Change Password
+            </button>
+            <button
+              onClick={() => setActiveTab("delete")}
+              className={`flex-1 py-4 px-6 font-semibold ${
+                activeTab === "delete"
+                  ? "text-red-600 border-b-2 border-red-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Delete Account
+            </button>
           </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="bg-white rounded-b-2xl shadow-xl p-8 border-x border-b border-gray-100">
+          {activeTab === "view" && (
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-6">Profile</h1>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Username
+                  </label>
+                  <p className="text-lg text-gray-900">{user.username}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <p className="text-lg text-gray-900">{user.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "update" && (
+            <UpdateProfile currentUser={user} onUpdate={handleUpdateUser} />
+          )}
+
+          {activeTab === "password" && <ChangePassword />}
+
+          {activeTab === "delete" && <DeleteAccount />}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;
