@@ -6,6 +6,8 @@ import Home from "./Components/Home.jsx";
 import Login from "./Components/Login.jsx";
 import Register from "./Components/Register.jsx";
 import Profile from "./Components/Profile.jsx";
+import UserList from "./Components/UserList.jsx";
+import UserDetails from "./Components/UserDetails.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PublicRoute from "./Components/PublicRoute.jsx";
@@ -41,6 +43,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Profile></Profile>,
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/users",
+        element: (
+          <ProtectedRoute>
+            <UserList></UserList>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/users/:id",
+        element: (
+          <ProtectedRoute>
+            <UserDetails></UserDetails>
           </ProtectedRoute>
         ),
       },
