@@ -1,27 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import axios from "../lib/axiosConfig";
 import { toast } from "react-toastify";
+import { useUsers } from "../hooks/useUsers";
 
 const UserList = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Use TanStack Query hook
+  const { data, isLoading, isError } = useUsers();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("/users/all");
-        setUsers(response.data.users);
-      } catch (error) {
-        toast.error("Failed to fetch users");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  // Handle errors
+  if (isError) {
+    toast.error("Failed to fetch users");
+  }
 
-  if (loading) {
+  const users = data?.users || [];
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Loading users...</p>

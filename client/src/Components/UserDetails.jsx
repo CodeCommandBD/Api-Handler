@@ -1,30 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../lib/axiosConfig";
 import { toast } from "react-toastify";
+import { useUserDetails } from "../hooks/useUserDetails";
 
 const UserDetails = () => {
   const { id } = useParams(); // ← Dynamic parameter from URL!
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(`/users/${id}`);
-        setUser(response.data.user);
-      } catch (error) {
-        toast.error("Failed to fetch user details");
-        navigate("/users");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [id, navigate]);
+  // Use TanStack Query hook
+  const { data, isLoading, isError, error } = useUserDetails(id);
 
-  if (loading) {
+  // Handle errors
+  if (isError) {
+    toast.error("Failed to fetch user details");
+    navigate("/users");
+    return null;
+  }
+
+  const user = data?.user;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Loading user details...</p>

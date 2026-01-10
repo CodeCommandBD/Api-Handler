@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { deleteAccountSchema } from "../lib/formSchema";
-import axios from "../lib/axiosConfig";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useDeleteAccount } from "../hooks/useDeleteAccount";
 
 const DeleteAccount = () => {
-  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate();
+
+  // Use TanStack Query mutation hook
+  const { mutate: deleteAccount, isPending } = useDeleteAccount();
 
   const {
     register,
@@ -20,24 +19,13 @@ const DeleteAccount = () => {
     resolver: zodResolver(deleteAccountSchema),
   });
 
-  const onSubmit = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axios.delete("/users/account", {
-        data: data,
-      });
-      toast.success(response.data.message);
-      localStorage.removeItem("token");
-      navigate("/register");
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to delete account";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-      setShowModal(false);
-      reset();
-    }
+  const onSubmit = (data) => {
+    deleteAccount(data, {
+      onSettled: () => {
+        setShowModal(false);
+        reset();
+      },
+    });
   };
 
   return (
@@ -91,10 +79,10 @@ const DeleteAccount = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isPending}
                   className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50"
                 >
-                  {loading ? "Deleting..." : "Delete"}
+                  {isPending ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </form>

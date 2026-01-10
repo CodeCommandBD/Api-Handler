@@ -2,38 +2,25 @@ import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import { registerSchema } from "../lib/formSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "../lib/axiosConfig";
-import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useRegister } from "../hooks/useRegister";
 
 const Register = () => {
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+
+  // Use TanStack Query mutation hook
+  const { mutate: register, isPending } = useRegister();
 
   const {
-    register,
+    register: registerField,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
   });
-  const onSubmit = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axios.post("/users/register", data);
-      toast.success(response.data.message || "Registration successful");
-      navigate("/login");
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Registration failed. Please try again";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+
+  const onSubmit = (data) => {
+    register(data);
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -89,8 +76,8 @@ const Register = () => {
                   id="username"
                   type="text"
                   placeholder="আপনার username লিখুন"
-                  {...register("username")}
-                  disabled={loading}
+                  {...registerField("username")}
+                  disabled={isPending}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
@@ -140,8 +127,8 @@ const Register = () => {
                   id="email"
                   type="email"
                   placeholder="আপনার email লিখুন"
-                  {...register("email")}
-                  disabled={loading}
+                  {...registerField("email")}
+                  disabled={isPending}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
@@ -191,8 +178,8 @@ const Register = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="আপনার password লিখুন"
-                  {...register("password")}
-                  disabled={loading}
+                  {...registerField("password")}
+                  disabled={isPending}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
                 <button
@@ -258,10 +245,10 @@ const Register = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

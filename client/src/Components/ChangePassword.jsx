@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { changePasswordSchema } from "../lib/formSchema";
-import axios from "../lib/axiosConfig";
-import { toast } from "react-toastify";
+import { useChangePassword } from "../hooks/useChangePassword";
 
 const ChangePassword = () => {
-  const [loading, setLoading] = useState(false);
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
   });
+
+  // Use TanStack Query mutation hook
+  const { mutate: changePassword, isPending } = useChangePassword();
 
   const {
     register,
@@ -21,21 +22,12 @@ const ChangePassword = () => {
     resolver: zodResolver(changePasswordSchema),
   });
 
-  const onSubmit = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axios.patch("/users/password", data);
-      console.log(response);
-      
-      toast.success(response.data.message);
-      reset();
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to change password";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = (data) => {
+    changePassword(data, {
+      onSuccess: () => {
+        reset();
+      },
+    });
   };
 
   return (
@@ -104,10 +96,10 @@ const ChangePassword = () => {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? "Changing..." : "Change Password"}
+          {isPending ? "Changing..." : "Change Password"}
         </button>
       </form>
     </div>

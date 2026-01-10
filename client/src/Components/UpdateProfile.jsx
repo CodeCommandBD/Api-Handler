@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfileSchema } from "../lib/formSchema";
-import axios from "../lib/axiosConfig";
-import { toast } from "react-toastify";
+import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
-const UpdateProfile = ({ currentUser, onUpdate }) => {
-  const [loading, setLoading] = useState(false);
+const UpdateProfile = ({ currentUser, onTabChange }) => {
+  // Use TanStack Query mutation hook
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
 
   const {
     register,
@@ -20,19 +20,15 @@ const UpdateProfile = ({ currentUser, onUpdate }) => {
     },
   });
 
-  const onSubmit = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axios.put("/users/profile", data);
-      toast.success(response.data.message);
-      onUpdate(response.data.user);
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to update profile";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = (data) => {
+    updateProfile(data, {
+      onSuccess: () => {
+        // Switch back to view tab after successful update
+        if (onTabChange) {
+          onTabChange();
+        }
+      },
+    });
   };
 
   return (
@@ -71,10 +67,10 @@ const UpdateProfile = ({ currentUser, onUpdate }) => {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? "Updating..." : "Update Profile"}
+          {isPending ? "Updating..." : "Update Profile"}
         </button>
       </form>
     </div>

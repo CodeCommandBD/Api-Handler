@@ -2,15 +2,14 @@ import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import { loginSchema } from "../lib/formSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "../lib/axiosConfig";
-import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import { useLogin } from "../hooks/useLogin";
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
+  // Use TanStack Query mutation hook
+  const { mutate: login, isPending } = useLogin();
 
   const {
     register,
@@ -20,22 +19,9 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data) => {
-    try {
-      setLoading(true)
-      const response = await axios.post('/users/login', data)
-      if(response.data.token){
-        localStorage.setItem('token', response.data.token);
-      }
-      toast.success(response.data.message || "Login Successful")
-      navigate('/profile')
-    } catch (error) {
-      const errorMessage = error.response?.data.message || error.response?.data.error || "Login failed. Please check your creadentials"
-      toast.error(errorMessage)
-    }finally{
-      setLoading(false)
-    }
-  }
+  const onSubmit = (data) => {
+    login(data);
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -91,7 +77,7 @@ const Login = () => {
                   type="email"
                   placeholder="আপনার email লিখুন"
                   {...register("email")}
-                  disabled={loading}
+                  disabled={isPending}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
@@ -142,7 +128,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="আপনার password লিখুন"
                   {...register("password")}
-                  disabled={loading}
+                  disabled={isPending}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
                 <button
@@ -208,10 +194,10 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -277,7 +263,7 @@ const Login = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

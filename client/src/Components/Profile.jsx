@@ -1,40 +1,29 @@
-import React, { useEffect, useState } from "react";
-import axios from "../lib/axiosConfig";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfileSkeleton from "./ProfileSkeleton";
 import { toast } from "react-toastify";
 import UpdateProfile from "./UpdateProfile";
 import ChangePassword from "./ChangePassword";
 import DeleteAccount from "./DeleteAccount";
+import { useProfile } from "../hooks/useProfile";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("view");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get("/users/profile");
-        setUser(response?.data?.user);
-      } catch (error) {
-        const errorMessage =
-          error.response?.data?.message || "Failed to fetch profile data";
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [navigate]);
+  // Use TanStack Query hook
+  const { data, isLoading, isError, error } = useProfile();
 
-  const handleUpdateUser = (updatedUser) => {
-    setUser(updatedUser);
-    setActiveTab("view");
-  };
+  // Handle errors
+  if (isError) {
+    const errorMessage =
+      error.response?.data?.message || "Failed to fetch profile data";
+    toast.error(errorMessage);
+  }
 
-  if (loading) {
+  const user = data?.user;
+
+  if (isLoading) {
     return <ProfileSkeleton></ProfileSkeleton>;
   }
 
@@ -120,7 +109,10 @@ const Profile = () => {
           )}
 
           {activeTab === "update" && (
-            <UpdateProfile currentUser={user} onUpdate={handleUpdateUser} />
+            <UpdateProfile
+              currentUser={user}
+              onTabChange={() => setActiveTab("view")}
+            />
           )}
 
           {activeTab === "password" && <ChangePassword />}
