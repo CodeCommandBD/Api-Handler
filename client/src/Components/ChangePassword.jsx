@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { changePasswordSchema } from "../lib/formSchema";
 import axios from "../lib/axiosConfig";
 import { toast } from "react-toastify";
 
@@ -8,22 +11,24 @@ const ChangePassword = () => {
     current: false,
     new: false,
   });
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(changePasswordSchema),
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const response = await axios.patch("/users/password", formData);
+      const response = await axios.patch("/users/password", data);
+      console.log(response);
+      
       toast.success(response.data.message);
-      setFormData({ currentPassword: "", newPassword: "" });
+      reset();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to change password";
@@ -36,7 +41,7 @@ const ChangePassword = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Change Password</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Current Password
@@ -44,10 +49,7 @@ const ChangePassword = () => {
           <div className="relative">
             <input
               type={showPasswords.current ? "text" : "password"}
-              name="currentPassword"
-              value={formData.currentPassword}
-              onChange={handleChange}
-              required
+              {...register("currentPassword")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <button
@@ -63,6 +65,11 @@ const ChangePassword = () => {
               {showPasswords.current ? "Hide" : "Show"}
             </button>
           </div>
+          {errors.currentPassword && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.currentPassword.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -72,10 +79,7 @@ const ChangePassword = () => {
           <div className="relative">
             <input
               type={showPasswords.new ? "text" : "password"}
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-              required
+              {...register("newPassword")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <button
@@ -91,6 +95,11 @@ const ChangePassword = () => {
               {showPasswords.new ? "Hide" : "Show"}
             </button>
           </div>
+          {errors.newPassword && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.newPassword.message}
+            </p>
+          )}
         </div>
 
         <button

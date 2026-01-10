@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { deleteAccountSchema } from "../lib/formSchema";
 import axios from "../lib/axiosConfig";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -6,15 +9,22 @@ import { useNavigate } from "react-router-dom";
 const DeleteAccount = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleDelete = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(deleteAccountSchema),
+  });
+
+  const onSubmit = async (data) => {
     try {
       setLoading(true);
       const response = await axios.delete("/users/account", {
-        data: { password },
+        data: data,
       });
       toast.success(response.data.message);
       localStorage.removeItem("token");
@@ -26,6 +36,7 @@ const DeleteAccount = () => {
     } finally {
       setLoading(false);
       setShowModal(false);
+      reset();
     }
   };
 
@@ -53,21 +64,26 @@ const DeleteAccount = () => {
               This action cannot be undone. Please enter your password to
               confirm.
             </p>
-            <form onSubmit={handleDelete} className="space-y-4">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <input
+                  type="password"
+                  {...register("password")}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                />
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
-                    setPassword("");
+                    reset();
                   }}
                   className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300"
                 >
