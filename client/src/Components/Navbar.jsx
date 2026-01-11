@@ -1,31 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, checkAuth } from "../store/slices/authSlice";
 
 const Navbar = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // check if user is logged in runs on every route change
+  // Get auth state from Redux
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  // Check authentication on mount and route change
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLogin(!!token);
-  }, [location]);
+    dispatch(checkAuth());
+  }, [dispatch, location]);
 
   // logout handler
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLogin(false);
+    dispatch(logout());
     toast.success("Logged out successfully");
     navigate("/login");
   };
+
   return (
     <div>
       <nav>
         <div className="flex justify-center gap-4 bg-blue-500 text-white p-4 font-bold">
           <Link to="/">Home</Link>
-          {isLogin ? (
+          {isAuthenticated ? (
             <>
               <Link to="/profile">Profile</Link>
               <button

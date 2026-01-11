@@ -14,6 +14,8 @@ import PublicRoute from "./Components/PublicRoute.jsx";
 import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Provider } from "react-redux";
+import { store } from "./store/store.js";
 
 // Create a QueryClient instance with default options
 const queryClient = new QueryClient({
@@ -84,9 +86,11 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")).render(
-  <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />
-    <ToastContainer />
-    <ReactQueryDevtools initialIsOpen={false} />
-  </QueryClientProvider>
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <ToastContainer />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  </Provider>
 );

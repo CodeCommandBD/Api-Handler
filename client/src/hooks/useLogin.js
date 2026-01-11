@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { loginUser } from "../lib/apiService";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slices/authSlice";
 
 /**
  * Custom hook for user login (POST)
@@ -9,13 +11,14 @@ import { loginUser } from "../lib/apiService";
  */
 export const useLogin = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      // Store token in localStorage
+      // Store token in localStorage and Redux
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        dispatch(login(data.token));
       }
       toast.success(data.message || "Login Successful");
       navigate("/profile");
