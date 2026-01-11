@@ -1,12 +1,15 @@
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // Public route - only accessible when NOT logged in
-const PublicRoute = ({children}) => {
-     const token = localStorage.getItem("token");
-     if(token){
-       return <Navigate to={'/profile'}></Navigate>
-     }
-  return children
-}
+const PublicRoute = ({ children }) => {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-export default PublicRoute
+  if (isAuthenticated) {
+    return <Navigate to={"/profile"}></Navigate>;
+  }
+
+  return children;
+};
+
+export default PublicRoute;
