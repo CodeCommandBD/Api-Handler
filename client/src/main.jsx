@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Provider } from "react-redux";
 import { store } from "./store/store.js";
+import About from "./Components/About.jsx";
 
 // Create a QueryClient instance with default options
 const queryClient = new QueryClient({
@@ -62,6 +63,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Profile></Profile>,
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/about",
+        element: (
+          <ProtectedRoute>
+            <About></About>,
           </ProtectedRoute>
         ),
       },

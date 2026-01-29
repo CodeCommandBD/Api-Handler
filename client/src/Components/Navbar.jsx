@@ -32,15 +32,18 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <Link to="/profile">Profile</Link>
+              <Link to="/about">About</Link>
               <button
                 onClick={handleLogout}
                 className="hover:bg-blue-600 px-3 py-1 rounded transition"
               >
+
                 Logout
               </button>
             </>
           ) : (
             <>
+              
               <Link to="/login">Login</Link>
               <Link to="/register">Register</Link>
             </>
